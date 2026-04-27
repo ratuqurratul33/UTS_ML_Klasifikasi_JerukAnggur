@@ -49,69 +49,69 @@ Proses pemodelan dilakukan dengan membandingkan tiga algoritma klasifikasi:
 
 ### 4.1 Decision Tree Classifier
 Model ini bekerja secara intuitif dengan membelah data berdasarkan aturan kondisional (seperti *threshold* diameter atau berat buah). 
+
 ```python
 from sklearn.tree import DecisionTreeClassifier
 
 # Inisialisasi dan melatih model Decision Tree
 dt_model = DecisionTreeClassifier(random_state=42)
 dt_model.fit(X_train_scaled, y_train)
+```
 
-###4.2 Naive Bayes Classifier (Gaussian)
+### 4.2 Naive Bayes Classifier (Gaussian)
 Model probabilitas yang didasarkan pada Teorema Bayes. Varian Gaussian dipilih karena sangat cocok untuk memproses kelima fitur fisik kita yang bertipe numerik dan kontinu.
 
-```Python
+```python
 from sklearn.naive_bayes import GaussianNB
 
 # Inisialisasi dan melatih model Naive Bayes
 nb_model = GaussianNB()
 nb_model.fit(X_train_scaled, y_train)
+```
 
-###4.3 Support Vector Machine (SVM)
-Model ini bekerja dengan mencari batas pemisah (hyperplane) paling optimal di antara kelas orange dan grapefruit. Karena SVM mengandalkan perhitungan jarak antar titik data di ruang dimensi, kita wajib menggunakan data yang sudah melewati proses scaling (X_train_scaled).
+### 4.3 Support Vector Machine (SVM)
+Model ini bekerja dengan mencari batas pemisah (*hyperplane*) paling optimal di antara kelas orange dan grapefruit. Karena SVM mengandalkan perhitungan jarak antar titik data di ruang dimensi, kita wajib menggunakan data yang sudah melewati proses *scaling* (`X_train_scaled`).
 
-```Python
+```python
 from sklearn.svm import SVC
 
 # Inisialisasi dan melatih model SVM menggunakan kernel RBF
 svm_model = SVC(kernel='rbf', random_state=42)
 svm_model.fit(X_train_scaled, y_train)
+```
 
-## 5️⃣Evaluasi & Analisis
-Setelah proses pelatihan selesai, ketiga model diuji menggunakan 20% data testing (berisi 2000 sampel buah yang belum pernah dilihat oleh model). Berdasarkan metrik evaluasi yang dihasilkan, berikut adalah komparasi kinerjanya:
+---
 
-🥇 Decision Tree Classifier (Akurasi: 94.00%)
+## 5️⃣ Evaluasi & Analisis
+Setelah proses pelatihan selesai, ketiga model diuji menggunakan 20% data *testing* (berisi 2000 sampel buah yang belum pernah dilihat oleh model). Berdasarkan metrik evaluasi yang dihasilkan, berikut adalah komparasi kinerjanya:
 
-🥈 Support Vector Machine / SVM (Akurasi: 93.70%)
+* 🥇 **Decision Tree Classifier** (Akurasi: 94.00%)
+* 🥈 **Support Vector Machine / SVM** (Akurasi: 93.70%)
+* 🥉 **Naive Bayes - Gaussian** (Akurasi: 92.00%)
 
-🥉 Naive Bayes - Gaussian (Akurasi: 92.00%)
+Selain unggul dari segi akurasi keseluruhan, metrik pendukung seperti *Precision*, *Recall*, dan *F1-Score* untuk ketiga model juga menunjukkan angka di atas 0.90 secara merata, menandakan tidak adanya indikasi *overfitting* yang parah atau bias kelas.
 
-Selain unggul dari segi akurasi keseluruhan, metrik pendukung seperti Precision, Recall, dan F1-Score untuk ketiga model juga menunjukkan angka di atas 0.90 secara merata, menandakan tidak adanya indikasi overfitting yang parah atau bias kelas.
-
-🔍 Analisis Kelebihan dan Kelemahan (Konteks Dataset)
+### 🔍 Analisis Kelebihan dan Kelemahan (Konteks Dataset)
 Meskipun Decision Tree keluar sebagai pemenang, penting untuk memahami bahwa performa ini sangat dipengaruhi oleh karakteristik dataset kita (hanya memiliki 5 kolom fitur/dimensi rendah).
 
-Decision Tree: * Kelebihan: Sangat diuntungkan karena jumlah fiturnya sedikit (hanya 5 dimensi) dan memiliki relasi hierarki yang logis (buah yang diameternya lebih besar hampir pasti lebih berat). Model ini memotong keputusan (split) dengan sangat cepat dan aturannya mudah dibaca manusia.
+1. **Decision Tree:** * **Kelebihan:** Sangat diuntungkan karena jumlah fiturnya sedikit (hanya 5 dimensi) dan memiliki relasi hierarki yang logis (buah yang diameternya lebih besar hampir pasti lebih berat). Model ini memotong keputusan (*split*) dengan sangat cepat dan aturannya mudah dibaca manusia.
+   * **Kelemahan:** Jika di masa depan sistem ini di-*upgrade* dengan menambahkan puluhan sensor baru, Decision Tree akan sangat rentan terhadap *overfitting* dan kinerjanya akan merosot tajam.
+2. **Support Vector Machine (SVM):**
+   * **Kelebihan:** Penggunaan kernel RBF sangat ahli dalam mencari batas pemisah (*hyperplane*) yang melengkung (non-linear) antar fitur warna dan ukuran. Jika data memiliki ratusan fitur kompleks, SVM adalah model yang paling "tahan banting" dan berpotensi besar mengalahkan Decision Tree.
+   * **Kelemahan:** Membutuhkan tahap standardisasi (*scaling*) mutlak. Selain itu, SVM ibarat *black-box*; lebih sulit menjelaskan logika keputusannya secara visual.
+3. **Naive Bayes (Gaussian):**
+   * **Kelebihan:** Kecepatan komputasinya adalah yang paling juara karena hanya menghitung probabilitas matematis murni. Sangat cocok jika ditanamkan pada perangkat berspesifikasi rendah (*microcontroller*).
+   * **Kelemahan:** Asumsi utamanya adalah bahwa setiap fitur berdiri sendiri (*independent*). Pada dataset ini, fitur RGB sebenarnya saling berkaitan membentuk persepsi warna. Asumsi "kepolosan" inilah yang membuat akurasinya tertinggal sedikit di posisi terakhir.
 
-Kelemahan: Jika di masa depan sistem ini di-upgrade dengan menambahkan puluhan sensor baru, Decision Tree akan sangat rentan terhadap overfitting dan kinerjanya akan merosot tajam.
+> 💡 **Kesimpulan Akhir:** Pendekatan metodologi CRISP-DM pada proyek ini berhasil dieksekusi dengan baik. Untuk diimplementasikan pada sistem penyortiran buah otomatis saat ini, algoritma Decision Tree adalah rekomendasi utama karena performanya paling akurat, efisien, dan keputusannya transparan. Namun, jika arsitektur perangkat keras industri kelak diperluas untuk mendeteksi ratusan parameter yang kompleks, model SVM harus menjadi pertimbangan utama penggantinya.
 
-Support Vector Machine (SVM):
+---
 
-Kelebihan: Penggunaan kernel RBF sangat ahli dalam mencari batas pemisah (hyperplane) yang melengkung (non-linear) antar fitur warna dan ukuran. Jika data memiliki ratusan fitur kompleks, SVM adalah model yang paling "tahan banting" dan berpotensi besar mengalahkan Decision Tree.
+## 6️⃣ Dokumentasi & Deployment
 
-Kelemahan: Membutuhkan tahap standardisasi (scaling) mutlak. Selain itu, SVM ibarat black-box; lebih sulit menjelaskan logika keputusannya secara visual.
+### 6.1 Struktur File Script (main.ipynb)
 
-Naive Bayes (Gaussian):
-
-Kelebihan: Kecepatan komputasinya adalah yang paling juara karena hanya menghitung probabilitas matematis murni. Sangat cocok jika ditanamkan pada perangkat berspesifikasi rendah (microcontroller).
-
-Kelemahan: Asumsi utamanya adalah bahwa setiap fitur berdiri sendiri (independent). Pada dataset ini, fitur RGB sebenarnya saling berkaitan membentuk persepsi warna. Asumsi "kepolosan" inilah yang membuat akurasinya tertinggal sedikit di posisi terakhir.
-
-💡 Kesimpulan Akhir: Pendekatan metodologi CRISP-DM pada proyek ini berhasil dieksekusi dengan baik. Untuk diimplementasikan pada sistem penyortiran buah otomatis saat ini, algoritma Decision Tree adalah rekomendasi utama karena performanya paling akurat, efisien, dan keputusannya transparan. Namun, jika arsitektur perangkat keras industri kelak diperluas untuk mendeteksi ratusan parameter yang kompleks, model SVM harus menjadi pertimbangan utama penggantinya.
-
-##6️⃣ Dokumentasi & Deployment
-###6.1 Struktur File Script (main.ipynb)
-
-'''Plaintext
+```text
 main.ipynb
   ├── Import libraries (pandas, numpy, sklearn, dll)
   ├── Load dataset
@@ -128,17 +128,17 @@ main.ipynb
       ├── Accuracy calculation
       ├── Classification report & Confusion matrix
       └── Comparative analysis
-###6.2 Petunjuk Penggunaan (How to Run)
+```
+
+### 6.2 Petunjuk Penggunaan (How to Run)
 Keseluruhan metodologi CRISP-DM proyek ini diimplementasikan menggunakan bahasa pemrograman Python di dalam ekosistem Jupyter Notebook. Untuk mengeksekusi, memvalidasi, atau mengembangkan ulang kode pada repositori ini, silakan ikuti panduan berikut:
 
-Pastikan Python 3 dan ekosistem Jupyter sudah terpasang di komputer Anda.
-
-Lakukan instalasi pustaka (library) pendukung yang dibutuhkan dengan menjalankan perintah berikut di terminal:
-
-Bash
-pip install pandas scikit-learn jupyter
-Unduh dataset (citrus.csv) dan letakkan file tersebut di dalam folder direktori yang sama dengan file script Jupyter Anda.
-
-Buka Command Prompt/Terminal, arahkan navigasi ke folder proyek, lalu ketik jupyter notebook.
-
-Buka file ekstensi .ipynb atau eksekusi blok kode secara berurutan (Run All) mulai dari tahapan impor pustaka hingga bagian pencetakan komparasi hasil evaluasi.
+1. Pastikan **Python 3** dan ekosistem **Jupyter** sudah terpasang di komputer Anda.
+2. Lakukan instalasi pustaka (*library*) pendukung yang dibutuhkan dengan menjalankan perintah berikut di terminal:
+   ```bash
+   pip install pandas scikit-learn jupyter
+   ```
+3. Unduh dataset (`citrus.csv`) dan letakkan file tersebut di dalam folder direktori yang sama dengan file script Jupyter Anda.
+4. Buka Command Prompt/Terminal, arahkan navigasi ke folder proyek, lalu ketik `jupyter notebook`.
+5. Buka file ekstensi `.ipynb` atau eksekusi blok kode secara berurutan (*Run All*) mulai dari tahapan impor pustaka hingga bagian pencetakan komparasi hasil evaluasi.
+```
